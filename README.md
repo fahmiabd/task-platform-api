@@ -1,58 +1,169 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Task Platform API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A distributed task processing platform built with Laravel, PostgreSQL, and NATS.
 
-## About Laravel
+This service acts as the API gateway and task producer. It receives task requests, stores them in PostgreSQL, and publishes events to NATS for downstream workers.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Architecture
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```text
+Client
+  ↓
+Laravel API
+  ↓
+PostgreSQL
+  ↓
+NATS
+  ↓
+Workers (Go)
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Features
 
-## Contributing
+* Create tasks via REST API
+* Store task metadata in PostgreSQL
+* Publish task events to NATS
+* Event-driven architecture
+* Ready for worker-based task processing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Tech Stack
 
-## Code of Conduct
+* Laravel 13
+* PostgreSQL
+* NATS
+* Docker
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Getting Started
 
-## Security Vulnerabilities
+### Prerequisites
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+* PHP 8.3+
+* Composer
+* Docker
+* PostgreSQL
+* NATS Server
+
+### Installation
+
+Clone the repository:
+
+```bash
+git clone git@github.com:fahmiabd/task-platform-api.git
+cd task-platform-api
+```
+
+Install dependencies:
+
+```bash
+composer install
+```
+
+Copy environment variables:
+
+```bash
+cp .env.example .env
+```
+
+Generate application key:
+
+```bash
+php artisan key:generate
+```
+
+### Database Configuration
+
+Update `.env`:
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=task_platform
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+```
+
+Run migrations:
+
+```bash
+php artisan migrate
+```
+
+### NATS Configuration
+
+Update `.env`:
+
+```env
+NATS_HOST=127.0.0.1
+NATS_PORT=4222
+```
+
+### Run Application
+
+```bash
+php artisan serve
+```
+
+## API
+
+### Create Task
+
+**POST** `/api/tasks`
+
+Request:
+
+```json
+{
+  "type": "email.send",
+  "payload": {
+    "to": "fahmi@example.com",
+    "subject": "Welcome",
+    "body": "Hello"
+  }
+}
+```
+
+Response:
+
+```json
+{
+  "task_id": "019e8bfa-a909-724c-87b7-c953f5bad8ac"
+}
+```
+
+## Event Format
+
+Subject:
+
+```text
+tasks.email.send
+```
+
+Payload:
+
+```json
+{
+  "task_id": "019e8bfa-a909-724c-87b7-c953f5bad8ac",
+  "payload": {
+    "to": "fahmi@example.com",
+    "subject": "Welcome",
+    "body": "Hello"
+  }
+}
+```
+
+## Roadmap
+
+* [x] Task creation API
+* [x] PostgreSQL persistence
+* [x] NATS publishing
+* [ ] Go worker service
+* [ ] JetStream integration
+* [ ] Task status tracking
+* [ ] Retry mechanism
+* [ ] Dead Letter Queue (DLQ)
+* [ ] Monitoring dashboard
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT
