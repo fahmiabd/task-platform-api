@@ -22,6 +22,7 @@ class CreateTaskController extends Controller
             "tasks.{$task->type}",
             [
                 'task_id' => $task->id,
+                'type' => $task->type,
                 'payload' => $task->payload,
             ]
         );
