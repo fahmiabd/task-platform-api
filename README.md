@@ -1,114 +1,38 @@
 # Task Platform API
 
-A distributed task processing platform built with Laravel, PostgreSQL, and NATS.
-
-This service acts as the API gateway and task producer. It receives task requests, stores them in PostgreSQL, and publishes events to NATS for downstream workers.
-
-## Architecture
-
-```text
-Client
-  ↓
-Laravel API
-  ↓
-PostgreSQL
-  ↓
-NATS
-  ↓
-Workers (Go)
-```
-
-## Features
-
-* Create tasks via REST API
-* Store task metadata in PostgreSQL
-* Publish task events to NATS
-* Event-driven architecture
-* Ready for worker-based task processing
+Task Platform API is a Laravel-based service responsible for creating and managing asynchronous tasks. The service stores task metadata in PostgreSQL and publishes task events to NATS for processing by workers.
 
 ## Tech Stack
 
 * Laravel 13
+* PHP 8.4+
 * PostgreSQL
 * NATS
-* Docker
 
-## Getting Started
+## Features
 
-### Prerequisites
+* Create asynchronous tasks
+* Store task metadata in PostgreSQL
+* Publish task events to NATS
+* Retrieve task details
+* Track task lifecycle status
 
-* PHP 8.3+
-* Composer
-* Docker
-* PostgreSQL
-* NATS Server
+## Task Lifecycle
 
-### Installation
-
-Clone the repository:
-
-```bash
-git clone git@github.com:fahmiabd/task-platform-api.git
-cd task-platform-api
+```text
+pending
+processing
+completed
+failed
 ```
 
-Install dependencies:
-
-```bash
-composer install
-```
-
-Copy environment variables:
-
-```bash
-cp .env.example .env
-```
-
-Generate application key:
-
-```bash
-php artisan key:generate
-```
-
-### Database Configuration
-
-Update `.env`:
-
-```env
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=task_platform
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-```
-
-Run migrations:
-
-```bash
-php artisan migrate
-```
-
-### NATS Configuration
-
-Update `.env`:
-
-```env
-NATS_HOST=127.0.0.1
-NATS_PORT=4222
-```
-
-### Run Application
-
-```bash
-php artisan serve
-```
-
-## API
+## API Endpoints
 
 ### Create Task
 
-**POST** `/api/tasks`
+```http
+POST /api/tasks
+```
 
 Request:
 
@@ -127,43 +51,80 @@ Response:
 
 ```json
 {
-  "task_id": "019e8bfa-a909-724c-87b7-c953f5bad8ac"
+  "id": "019ea58c-9235-70d1-8dd3-3158ba789400",
+  "status": "pending"
 }
 ```
 
-## Event Format
+### Get Task Detail
 
-Subject:
-
-```text
-tasks.email.send
+```http
+GET /api/tasks/{id}
 ```
 
-Payload:
+Response:
 
 ```json
 {
-  "task_id": "019e8bfa-a909-724c-87b7-c953f5bad8ac",
-  "payload": {
-    "to": "fahmi@example.com",
-    "subject": "Welcome",
-    "body": "Hello"
-  }
+  "id": "019ea58c-9235-70d1-8dd3-3158ba789400",
+  "type": "email.send",
+  "payload": {},
+  "status": "completed",
+  "started_at": null,
+  "completed_at": null
 }
 ```
 
-## Roadmap
+## Local Development
 
-* [x] Task creation API
-* [x] PostgreSQL persistence
-* [x] NATS publishing
-* [ ] Go worker service
-* [ ] JetStream integration
-* [ ] Task status tracking
-* [ ] Retry mechanism
-* [ ] Dead Letter Queue (DLQ)
-* [ ] Monitoring dashboard
+### Install Dependencies
 
-## License
+```bash
+composer install
+```
 
-MIT
+### Environment
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Configure PostgreSQL and NATS connection.
+
+### Run Migration
+
+```bash
+php artisan migrate
+```
+
+### Start Server
+
+```bash
+php artisan serve
+```
+
+## Architecture
+
+```text
+Client
+  ↓
+Task Platform API
+  ↓
+PostgreSQL
+
+Task Platform API
+  ↓
+NATS
+  ↓
+Task Platform Worker
+```
+
+## Future Improvements
+
+* NATS JetStream
+* Retry mechanism
+* Dead Letter Queue (DLQ)
+* Task scheduling
+* Metrics and monitoring
+* Authentication & authorization
