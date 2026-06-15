@@ -9,8 +9,11 @@ services:
       - "5432:5432"
 
   nats:
-    image: nats:latest
-    command: -js
+    image: nats:2.11
+    command: 
+      - "-js"
+      - "-m"
+      - "8222"
     ports:
       - "4222:4222"
       - "8222:8222"
