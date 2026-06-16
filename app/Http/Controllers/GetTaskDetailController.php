@@ -19,6 +19,7 @@ class GetTaskDetailController extends Controller
             'status' => $task->status,
             'started_at' => $task->started_at,
             'completed_at' => $task->completed_at,
+            'retry_count' => $task->retry_count,
         ]);
     }
 }
